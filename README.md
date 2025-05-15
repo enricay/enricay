@@ -4,3 +4,10 @@
 - 🌱 I’m currently living Lagos, Nigeria ...
 - 💞️ I’m looking to collaborate on any mobile development...
 - How to reach me osundarekayode@yahoo.com or gmail.com ...
+
+
+
+
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          installation_id: ${{ secrets.GH_APP_INSTALLATION_ID }}
