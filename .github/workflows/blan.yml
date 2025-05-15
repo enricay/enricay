@@ -1,0 +1,17 @@
+name: Second workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag version from first workflow'
+        required: true
+        type: string
+
+jobs:
+  print-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print the tag
+        run: |
+            echo "Triggered by tag: ${{ github.event.inputs.tag }}"
