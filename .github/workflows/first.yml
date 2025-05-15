@@ -1,7 +1,7 @@
 name: Trigger workflow via GitHub App token
 
 on:
-  workflow_dispatch:  # manually triggered; change to push/schedule if needed
+  workflow_dispatch:  # Manually triggered; adjust if needed
 
 jobs:
   trigger-next:
@@ -11,13 +11,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0        # Fetch full history including all tags
+          fetch-depth: 0  # Fetch full history including tags
 
       - name: Generate GitHub App Token
         id: generate_token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ secrets.GH_APP_ID }}          # exact input name: app-id
+          app-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
       - name: Fetch last Git tag
@@ -26,6 +26,7 @@ jobs:
           LAST_TAG=$(git describe --tags --abbrev=0)
           STRIPPED_TAG=${LAST_TAG#v}
           echo "last_tag=$STRIPPED_TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag found: $STRIPPED_TAG"
 
       - name: Trigger second workflow
         run: |

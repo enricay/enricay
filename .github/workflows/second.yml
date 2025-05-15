@@ -9,12 +9,23 @@ on:
         type: string
 
 jobs:
-  print-tag:
+  print-and-convert-tag:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Print the tag
+      - name: Print the tag received
         run: |
-            echo "Triggered by tag: ${{ github.event.inputs.tag }}"
+          echo "Triggered by tag: ${{ github.event.inputs.tag }}"
 
+      - name: Convert tag to release name
+        id: release
+        run: |
+          TAG=${{ github.event.inputs.tag }}
+          RELEASE="release-${TAG#v}"  # Remove leading 'v' if present
+          echo "release_name=$RELEASE" >> $GITHUB_OUTPUT
 
-            # new changes
+      - name: Use release name in deployment
+        run: |
+          echo "Release name generated: ${{ steps.release.outputs.release_name }}"
+          # You can add your deployment logic here, e.g.:
+          # ./deploy.sh --release ${{ steps.release.outputs.release_name }}
