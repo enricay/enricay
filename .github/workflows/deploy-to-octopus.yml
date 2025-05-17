@@ -19,9 +19,10 @@ jobs:
       - name: Zip File
         run: zip -r output.zip output/
 
-      - name: Install Octo CLI
+      - name: Install Octopus CLI via installer script
         run: |
-          curl -sL https://octopus.com/downloads/latest/octo/linux-x64 | sudo tar xvz -C /usr/local/bin
+          curl -L https://github.com/OctopusDeploy/cli/raw/main/scripts/install.sh | bash
+      
 
       - name: Push Package to Octopus
         run: |
