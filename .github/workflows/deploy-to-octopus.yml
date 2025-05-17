@@ -19,9 +19,18 @@ jobs:
       - name: Zip File
         run: zip -r output.zip output/
 
-      - name: Install Octopus CLI via installer script
+      - name: Install Octopus CLI via apt
         run: |
-          curl -L https://github.com/OctopusDeploy/cli/raw/main/scripts/install.sh | bash
+          sudo apt update
+          sudo apt install -y gnupg curl ca-certificates apt-transport-https
+          # Add Octopus APT key
+          curl -sSfL https://apt.octopus.com/public.key \
+            | sudo gpg --dearmor -o /usr/share/keyrings/octopus.com.gpg
+          # Add Octopus repo
+          echo "deb [signed-by=/usr/share/keyrings/octopus.com.gpg] https://apt.octopus.com stable main" \
+            | sudo tee /etc/apt/sources.list.d/octopus.com.list
+          sudo apt update
+          sudo apt install -y octopuscli
       
 
       - name: Push Package to Octopus
