@@ -39,7 +39,7 @@ jobs:
             --server "${{ secrets.OCTOPUS_SERVER }}" \
             --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
             --package output.zip \
-            --packageId github-artifact \
+            --package-id github-artifact \
             --space "crossaccountdeployments"
 
       - name: Create Octopus Release
