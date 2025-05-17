@@ -40,7 +40,7 @@ jobs:
             --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
             --package output.zip \
             --packageId github-artifact \
-            --space "rossaccountDeployments"
+            --space "crossaccountDeployments"
 
       - name: Create Octopus Release
         run: |
