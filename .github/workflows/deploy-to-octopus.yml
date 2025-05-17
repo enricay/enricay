@@ -40,7 +40,7 @@ jobs:
             --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
             --package output.zip \
             --packageId github-artifact \
-            --space "crossaccountDeployments"
+            --space "crossaccountdeployments"
 
       - name: Create Octopus Release
         run: |
@@ -49,7 +49,7 @@ jobs:
             --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
             --project "CrossAccountS3Uploader" \
             --version "1.${{ github.run_number }}" \
-            --space "crossaccountDeployments" \
+            --space "crossaccountdeployments" \
             --package github-artifact:output.zip
 
       - name: Deploy Octopus Release
@@ -58,7 +58,7 @@ jobs:
             --server "${{ secrets.OCTOPUS_SERVER }}" \
             --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
             --project "CrossAccountS3Uploader" \
-            --space "crossaccountDeployments" \
+            --space "crossaccountdeployments" \
             --version "1.${{ github.run_number }}" \
             --deployTo "Staging"
 
