@@ -22,8 +22,12 @@ jobs:
           echo "This is created from GitHub Action and zipped and sent to Octopus. Octopus now deploys it from Account A to Account B" \
             > output/info.txt
 
-      - name: Zip File
-        run: zip -r output.zip output/
+      - name: Zip the Artifact
+        run: |
+          VERSION="1.${{ github.run_number }}"
+          PACKAGE_NAME="github-artifact.${VERSION}.zip"
+          zip -r "$PACKAGE_NAME" output/
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
 
       - name: Install Octopus CLI 🐙
         uses: OctopusDeploy/install-octopus-cli-action@v3
@@ -34,13 +38,15 @@ jobs:
         uses: OctopusDeploy/push-package-action@v3
         with:
           packages: |
-            output.zip
+            ${{ env.PACKAGE_NAME }}
 
       - name: Create Octopus Release 🐙
         uses: OctopusDeploy/create-release-action@v3
         with:
           project: 'CrossAccountS3Uploader'
           release_number: "1.${{ github.run_number }}"
+          packages: |
+            github-artifact:1.${{ github.run_number }}
 
       - name: Deploy Octopus Release 🐙
         uses: OctopusDeploy/deploy-release-action@v3
