@@ -1,0 +1,54 @@
+name: Build and Trigger Octopus
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create Content File
+        run: |
+          mkdir output
+          echo "This is created from GitHub Action and zipped and sent to Octopus. Octopus now deploys it from Account A to Account B" > output/info.txt
+
+      - name: Zip File
+        run: zip -r output.zip output/
+
+      - name: Install Octo CLI
+        run: |
+          curl -sL https://octopus.com/downloads/latest/octo/linux-x64 | sudo tar xvz -C /usr/local/bin
+
+      - name: Push Package to Octopus
+        run: |
+          octo push \
+            --server "${{ secrets.OCTOPUS_SERVER }}" \
+            --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
+            --package output.zip \
+            --packageId github-artifact \
+            --space "rossaccountDeployments"
+
+      - name: Create Octopus Release
+        run: |
+          octo create-release \
+            --server "${{ secrets.OCTOPUS_SERVER }}" \
+            --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
+            --project "CrossAccountS3Uploader" \
+            --version "1.${{ github.run_number }}" \
+            --space "crossaccountDeployments" \
+            --package github-artifact:output.zip
+
+      - name: Deploy Octopus Release
+        run: |
+          octo deploy-release \
+            --server "${{ secrets.OCTOPUS_SERVER }}" \
+            --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
+            --project "CrossAccountS3Uploader" \
+            --space "crossaccountDeployments" \
+            --version "1.${{ github.run_number }}" \
+            --deployTo "Staging"
+
