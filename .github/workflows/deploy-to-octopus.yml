@@ -3,8 +3,13 @@ name: Build and Trigger Octopus
 on:
   workflow_dispatch:
 
+env:
+  OCTOPUS_URL: ${{ secrets.OCTOPUS_SERVER }}
+  OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+  OCTOPUS_SPACE: crossaccountdeployments
+
 jobs:
-  build-and-upload:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,51 +19,33 @@ jobs:
       - name: Create Content File
         run: |
           mkdir output
-          echo "This is created from GitHub Action and zipped and sent to Octopus. Octopus now deploys it from Account A to Account B" > output/info.txt
+          echo "This is created from GitHub Action and zipped and sent to Octopus. Octopus now deploys it from Account A to Account B" \
+            > output/info.txt
 
       - name: Zip File
         run: zip -r output.zip output/
 
-      - name: Install Octopus CLI via apt
-        run: |
-          sudo apt update
-          sudo apt install -y gnupg curl ca-certificates apt-transport-https
-          # Add Octopus APT key
-          curl -sSfL https://apt.octopus.com/public.key \
-            | sudo gpg --dearmor -o /usr/share/keyrings/octopus.com.gpg
-          # Add Octopus repo
-          echo "deb [signed-by=/usr/share/keyrings/octopus.com.gpg] https://apt.octopus.com stable main" \
-            | sudo tee /etc/apt/sources.list.d/octopus.com.list
-          sudo apt update
-          sudo apt install -y octopuscli
-      
+      - name: Install Octopus CLI 🐙
+        uses: OctopusDeploy/install-octopus-cli-action@v3
+        with:
+          version: '*'
 
-      - name: Push Package to Octopus
-        run: |
-          octo push \
-            --server "${{ secrets.OCTOPUS_SERVER }}" \
-            --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
-            --package output.zip \
-            --package-id github-artifact \
-            --space "crossaccountdeployments"
+      - name: Push Package to Octopus 🐙
+        uses: OctopusDeploy/push-package-action@v3
+        with:
+          packages: |
+            output.zip
 
-      - name: Create Octopus Release
-        run: |
-          octo create-release \
-            --server "${{ secrets.OCTOPUS_SERVER }}" \
-            --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
-            --project "CrossAccountS3Uploader" \
-            --version "1.${{ github.run_number }}" \
-            --space "crossaccountdeployments" \
-            --package github-artifact:output.zip
+      - name: Create Octopus Release 🐙
+        uses: OctopusDeploy/create-release-action@v3
+        with:
+          project: 'CrossAccountS3Uploader'
+          release_number: "1.${{ github.run_number }}"
 
-      - name: Deploy Octopus Release
-        run: |
-          octo deploy-release \
-            --server "${{ secrets.OCTOPUS_SERVER }}" \
-            --apiKey "${{ secrets.OCTOPUS_API_KEY }}" \
-            --project "CrossAccountS3Uploader" \
-            --space "crossaccountdeployments" \
-            --version "1.${{ github.run_number }}" \
-            --deployTo "Staging"
-
+      - name: Deploy Octopus Release 🐙
+        uses: OctopusDeploy/deploy-release-action@v3
+        with:
+          project: 'CrossAccountS3Uploader'
+          release_number: "1.${{ github.run_number }}"
+          environments: |
+            Staging
